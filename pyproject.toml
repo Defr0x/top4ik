@@ -1,20 +1,15 @@
 [project]
-name = "duck"
-version = "0.1.0"
-description = "Add your description here"
+name = "neuroapi"
+version = "0.2.0"
+description = "NeuroAPI — сайт-магазин доступа к нейросетям (Flask + MySQL)"
 readme = "README.md"
-authors = [
-    { name = "Ваше Имя", email = "you@example.com" }
-]
 requires-python = ">=3.8"
 dependencies = [
     "flask>=3.0.3",
     "mysql-connector-python>=9.0.0",
+    "python-dotenv>=1.0.1",
 ]
 
-[project.scripts]
-duck = "duck:main"
-
-[build-system]
-requires = ["uv_build>=0.12.10,<0.13.0"]
-build-backend = "uv_build"
+# Проект — не пакет (запускаем app.py напрямую)
+[tool.uv]
+package = false

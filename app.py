@@ -4,6 +4,8 @@ import os
 import re
 import secrets
 from contextlib import closing
+from pathlib import Path
+
 import pymysql
 pymysql.install_as_MySQLdb()
 import mysql.connector
@@ -11,35 +13,43 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from mysql.connector import Error as MySQLError
 from werkzeug.security import check_password_hash, generate_password_hash
-from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv(dotenv_path=Path(__file__).parent / ".env")
-load_dotenv()
 
+# --- 1. Загрузка переменных из .env ---
+# Ищем файл .env строго в папке, где лежит этот скрипт
+env_path = Path(__file__).parent / ".env"
+# override=True заставляет перезаписывать уже существующие в системе переменные
+load_dotenv(dotenv_path=env_path, override=True)
+
+# --- 2. Настройка логирования ---
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Секретный ключ сессий — из окружения; если не задан, генерируем случайный
-# (тогда сессии сбрасываются при перезапуске сервера).
+# --- 3. Секретный ключ ---
 app.secret_key = os.environ.get("SECRET_KEY")
 if not app.secret_key:
     app.secret_key = os.urandom(32)
-    logger.warning("SECRET_KEY не задан: используется случайный ключ, задай его в .env")
+    logger.warning("SECRET_KEY не задан в .env: используется случайный ключ")
 
+# --- 4. Конфигурация БД из .env ---
 DB_CONFIG = {
-    "host": "185.114.247.43",
-    "port": 3306,
-    "database": "sch688_vvedenie",
-    "user": "sch688_vvedenie",
-    "password": "Qwerty123",
+    "host": os.environ.get("DB_HOST", "localhost"),
+    "port": int(os.environ.get("DB_PORT", "3306")),
+    "database": os.environ.get("DB_NAME", ""),
+    "user": os.environ.get("DB_USER", ""),
+    "password": os.environ.get("DB_PASSWORD", ""),
     "connection_timeout": 5,
 }
-DB_MISSING = []
+
+# Проверяем, все ли критически важные переменные заданы
+DB_MISSING = [k for k in ("DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD") if not os.environ.get(k)]
+if DB_MISSING:
+    logger.warning("ВНИМАНИЕ: В .env не заданы переменные: %s", ", ".join(DB_MISSING))
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-MIN_PASSWORD_LEN = 6
+
+# ... дальше идет ваш код с PRODUCTS и функциями ...
 
 # Каталог нейросетей, которые продаём
 PRODUCTS = [

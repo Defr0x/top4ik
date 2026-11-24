@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Чат с ИИ — NeuroAPI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav class="topnav">
+    <a class="logo" href="/dashboard">← В кабинет</a>
+    <h2>Чат с Нейросетью</h2>
+</nav>
+
+<main class="page" style="max-width: 800px;">
+    <div id="chat-box" class="glass panel" style="height: 400px; overflow-y: auto; padding: 15px; margin-bottom: 15px;">
+        <div class="msg ai" style="color: var(--cyan); margin-bottom: 10px;">Привет! Я нейросеть Qwen. Спроси меня о чём-нибудь.</div>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="chat-input" class="field" style="flex: 1; padding: 12px; border-radius: 12px; border: 1.5px solid var(--glass-border); background: rgba(255,255,255,0.05); color: white;" placeholder="Введи сообщение...">
+        <button id="send-btn" class="btn">Отправить</button>
+    </div>
+</main>
+
+<script>
+document.getElementById('send-btn').addEventListener('click', async () => {
+    const input = document.getElementById('chat-input');
+    const box = document.getElementById('chat-box');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    // Сообщение пользователя
+    box.innerHTML += `<div class="msg user" style="text-align: right; margin: 10px 0;"><b>Вы:</b> ${msg}</div>`;
+    input.value = '';
+
+    // Сообщение "печатает..."
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'msg ai';
+    loadingDiv.style.margin = '10px 0';
+    loadingDiv.innerHTML = '<i>ИИ думает...</i>';
+    box.appendChild(loadingDiv);
+    box.scrollTop = box.scrollHeight;
+
+    const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: msg})
+    });
+    const data = await res.json();
+    
+    // Удаляем "печатает..."
+    loadingDiv.remove();
+
+    if (data.reply) {
+        box.innerHTML += `<div class="msg ai" style="margin: 10px 0;"><b>ИИ:</b> ${data.reply}</div>`;
+    } else {
+        box.innerHTML += `<div class="msg ai" style="color: var(--danger); margin: 10px 0;">Ошибка: ${data.error || 'Неизвестно'}</div>`;
+    }
+    box.scrollTop = box.scrollHeight;
+});
+</script>
+</body>
+</html>

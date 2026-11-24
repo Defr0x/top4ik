@@ -13,14 +13,15 @@
 <nav class="topnav">
     <a class="logo" href="/">🧠 Neuro<span>API</span></a>
     <div class="nav-right">
-        <span class="subtitle" style="margin:0">{{ username }}</span>
+        <a class="btn btn-sm" href="/chat">💬 Чат с ИИ</a>
+        <span class="subtitle" style="margin:0 10px">{{ username }}</span>
         <a class="btn btn-ghost btn-sm" href="/logout">Выйти</a>
     </div>
 </nav>
 
 <main class="page">
     <h1 class="page-title">Личный кабинет</h1>
-    <p class="page-sub">Управляй балансом и API-ключами</p>
+    <p class="page-sub">Управляй балансом и смотри историю</p>
 
     <div class="dash-grid">
         <!-- Баланс -->
@@ -32,43 +33,35 @@
                 <button class="btn btn-sm btn-ghost topup-btn" data-amount="500">+500 ₽</button>
                 <button class="btn btn-sm btn-ghost topup-btn" data-amount="1000">+1000 ₽</button>
             </div>
-            <p class="topup-note">Демо-режим: деньги виртуальные, настоящая оплата не списывается.</p>
+            <p class="topup-note">Демо-режим: деньги виртуальные.</p>
         </section>
 
-        <!-- API-ключи -->
+        <!-- Транзакции -->
         <section class="glass panel">
-            <h3>Мои API-ключи</h3>
-            <div class="new-key" id="newKeyBox" hidden>
-                <div class="nk-title">✅ Новый ключ <span id="newKeyProduct"></span> — сохрани его</div>
-                <div class="nk-row">
-                    <code id="newKeyValue"></code>
-                    <button class="btn btn-sm" id="copyKeyBtn">Копировать</button>
-                </div>
-            </div>
-            <div id="keysList">
-                {% for k in keys %}
-                <div class="key-item" data-key-id="{{ k.id }}">
-                    <span class="k-icon">{{ k.product_icon }}</span>
+            <h3>Последние транзакции</h3>
+            <div id="transactionsList">
+                {% for t in transactions %}
+                <div class="key-item">
                     <div class="k-body">
-                        <div class="k-product">{{ k.product_name }}</div>
-                        <div class="k-key">{{ k.api_key }}</div>
+                        <div class="k-product">{{ t.description }}</div>
+                        <div class="k-date">{{ t.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
                     </div>
-                    <span class="k-date">{{ k.created }}</span>
-                    {% if k.active %}
-                    <button class="btn btn-sm btn-ghost revoke-btn" data-key-id="{{ k.id }}">Отозвать</button>
-                    {% else %}
-                    <span class="badge-off">отозван</span>
-                    {% endif %}
+                    <span class="k-key {% if t.amount > 0 %}text-ok{% else %}text-danger{% endif %}">
+                        {{ '+' if t.amount > 0 else '' }}{{ t.amount }} ₽
+                    </span>
+                    <span class="k-date">Остаток: {{ t.balance_after }} ₽</span>
                 </div>
                 {% endfor %}
+                {% if not transactions %}
+                <p class="empty">Пока нет транзакций.</p>
+                {% endif %}
             </div>
-            <p class="empty" id="keysEmpty" {% if keys %}hidden{% endif %}>Ключей пока нет — купи доступ к любой модели ниже 👇</p>
         </section>
     </div>
 
     <!-- Каталог -->
     <h2 class="section-title">Каталог нейросетей</h2>
-    <p class="section-sub">Купил — сразу получил ключ</p>
+    <p class="section-sub">Купи доступ к любой модели</p>
     <div class="grid">
         {% for p in products %}
         <div class="glass product">
@@ -76,7 +69,7 @@
             <h3>{{ p.name }}</h3>
             <p>{{ p.desc }}</p>
             <div class="price">{{ p.price }} ₽ <small>/ мес</small></div>
-            <button class="btn buy-btn" data-product="{{ p.slug }}" data-price="{{ p.price }}">Купить доступ</button>
+            <button class="btn buy-btn" data-product="{{ p.slug }}">Купить доступ</button>
         </div>
         {% endfor %}
     </div>

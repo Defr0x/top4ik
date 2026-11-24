@@ -4,13 +4,16 @@ import os
 import re
 import secrets
 from contextlib import closing
-
+import pymysql
+pymysql.install_as_MySQLdb()
 import mysql.connector
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from mysql.connector import Error as MySQLError
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
@@ -26,16 +29,14 @@ if not app.secret_key:
     logger.warning("SECRET_KEY не задан: используется случайный ключ, задай его в .env")
 
 DB_CONFIG = {
-    "host": os.environ.get("DB_HOST", ""),
-    "port": int(os.environ.get("DB_PORT", "3306")),
-    "database": os.environ.get("DB_NAME", ""),
-    "user": os.environ.get("DB_USER", ""),
-    "password": os.environ.get("DB_PASSWORD", ""),
+    "host": "185.114.247.43",
+    "port": 3306,
+    "database": "sch688_vvedenie",
+    "user": "sch688_vvedenie",
+    "password": "Qwery123",
     "connection_timeout": 5,
 }
-DB_MISSING = [k for k in ("DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD") if not os.environ.get(k)]
-if DB_MISSING:
-    logger.warning("Не заданы переменные окружения: %s", ", ".join(DB_MISSING))
+DB_MISSING = []
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 MIN_PASSWORD_LEN = 6

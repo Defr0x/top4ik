@@ -33,7 +33,7 @@ DB_CONFIG = {
     "port": 3306,
     "database": "sch688_vvedenie",
     "user": "sch688_vvedenie",
-    "password": "Qwery123",
+    "password": "Qwerty123",
     "connection_timeout": 5,
 }
 DB_MISSING = []
